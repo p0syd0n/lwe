@@ -1,0 +1,9 @@
+[package]
+name = "lwe"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+faer = "0.23.2"
+rand = "0.9.2"
+rand_distr = "0.5.1"
