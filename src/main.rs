@@ -182,21 +182,21 @@ fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
 
     let received_b = ciphertext_vectorized[ciphertext_vectorized.len() - 1];
     
-    let Q_f64 = Q as f64;
+    let q_f64 = Q as f64;
     // Boundary 1: Q/4
-    let Q_quarter = Q_f64 / 4.0;
+    let q_quarter = q_f64 / 4.0;
     // Boundary 2: 3Q/4
-    let Q_three_quarters = 3.0 * Q_f64 / 4.0;
+    let q_three_quarters = 3.0 * q_f64 / 4.0;
 
     // 1. Calculate the raw difference (noisy signal) in the range [0, Q).
     // This value, raw_diff, is what we compare against the boundaries.
-    let raw_diff = (received_b - cumulative_b).rem_euclid(Q_f64);
+    let raw_diff = (received_b - cumulative_b).rem_euclid(q_f64);
     println!("The recieved-cumulative = {}-{}={}==={}", received_b, cumulative_b, received_b-cumulative_b, raw_diff);
     
     // 2. Decide the bit:
     // Bit is 1 if raw_diff is in the Q/2 neighborhood [Q/4, 3Q/4].
     // Otherwise, the bit is 0 (it's in the 0 neighborhood, [0, Q/4) or (3Q/4, Q)).
-    let bit: bool = if raw_diff >= Q_quarter && raw_diff <= Q_three_quarters {
+    let bit: bool = if raw_diff >= q_quarter && raw_diff <= q_three_quarters {
         true
     } else {
         false
@@ -247,7 +247,7 @@ fn decrypt_text(text: String, private_key: &Mat<f64>) -> String {
 }
 
 fn encrypt_file(filename: String) -> usize {
-    let mut path_file = Path::new(&filename);
+    let path_file = Path::new(&filename);
     // Open the path in read-only mode, returns `io::Result<File>`
     let mut file = match File::open(&path_file) {
         Err(why) => panic!("couldn't open {}: {}", filename, why),
@@ -256,7 +256,7 @@ fn encrypt_file(filename: String) -> usize {
 
     // Read the file contents into a string, returns `io::Result<usize>`
     let mut data = String::new();
-    let mut bytes: usize;
+    let bytes: usize;
     match file.read_to_string(&mut data) {
         Err(why) => panic!("couldn't read {}: {}", filename, why),
         Ok(bytes_) => {
@@ -269,7 +269,7 @@ fn encrypt_file(filename: String) -> usize {
 
     let path = Path::new("public.key");
     let mut file = match File::open(&path) {
-        Err(reason) => panic!("Failed opening the public key file"),
+        Err(reason) => panic!("Failed opening the public key file:  {}", reason),
         Ok(file) => file,
     };
 
@@ -301,12 +301,12 @@ fn encrypt_file(filename: String) -> usize {
         Err(reason) => panic!("{}", reason),
         Ok(file) => file,
     };
-    file.write_all(ciphertext.as_bytes());
+    let _ = file.write_all(ciphertext.as_bytes());
     bytes
 }
 
 fn decrypt_file(filename: String) -> usize {
-    let mut path_file = Path::new(&filename);
+    let path_file = Path::new(&filename);
     // Open the path in read-only mode, returns `io::Result<File>`
     let mut file_data = match File::open(&path_file) {
         Err(why) => panic!("couldn't open {}: {}", filename, why),
@@ -315,7 +315,7 @@ fn decrypt_file(filename: String) -> usize {
 
     // Read the file contents into a string, returns `io::Result<usize>`
     let mut data = String::new();
-    let mut bytes: usize;
+    let bytes: usize;
     match file_data.read_to_string(&mut data) {
         Err(why) => panic!("couldn't read {}: {}", filename, why),
         Ok(bytes_) => {
@@ -328,7 +328,7 @@ fn decrypt_file(filename: String) -> usize {
 
     let path = Path::new("private.key");
     let mut file = match File::open(&path) {
-        Err(reason) => panic!("Failed opening the private key file"),
+        Err(reason) => panic!("Failed opening the private key file: {}", reason),
         Ok(file) => file,
     };
 
@@ -356,7 +356,7 @@ fn decrypt_file(filename: String) -> usize {
         Err(reasom) => panic!("{}", reasom),
         Ok(file) => file,
     };
-    file.write_all(plaintext.as_bytes());
+    let _ = file.write_all(plaintext.as_bytes());
     println!("wrote to file: {}", plaintext);
     bytes
 }
@@ -388,7 +388,7 @@ fn export_keys() {
         pubkey_string.push_str(")\n");
     }
 
-    file_pub.write_all(pubkey_string.as_bytes());
+    let _ = file_pub.write_all(pubkey_string.as_bytes());
 
 
     let path_priv = Path::new("private.key");
@@ -408,9 +408,10 @@ fn export_keys() {
     }
     privkey_string.push_str(")");
 
-    file_priv.write_all(privkey_string.as_bytes());
+    let _ = file_priv.write_all(privkey_string.as_bytes());
 }
 
+#[allow(dead_code)]
 fn main1() {
     export_keys();
     let (private_key, public_key) = gen_key();
