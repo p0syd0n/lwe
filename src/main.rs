@@ -18,7 +18,7 @@ fn gauss_error() -> f64 {
     let normal = Normal::new(0.0, STDEV).unwrap();
     let mut rng = rng();
     let sample = normal.sample(&mut rng);
-     println!("[gauss_error] Sampled noise e = {:.4}", sample);
+    // println!("[gauss_error] Sampled noise e = {:.4}", sample);
     sample
 }
 
@@ -44,9 +44,9 @@ fn gen_key() -> (Mat<f64>, Mat<f64>) {
             cumulative_b += choice * private_key[(0, column)];
             cumulative_b = cumulative_b.rem_euclid(Q);
             // println!(
-            //     "    A[{},{}] = {:.2}, s[{}] = {:.2} → partial cumulative_b = {:.2}",
-            //     row, column, choice, column, private_key[(0, column)], cumulative_b
-            // );
+               // "    A[{},{}] = {:.2}, s[{}] = {:.2} → partial cumulative_b = {:.2}",
+              //  row, column, choice, column, private_key[(0, column)], cumulative_b
+           // );
         }
         let error = gauss_error();
         cumulative_b += error;
@@ -90,19 +90,19 @@ fn bits_to_u32(bits: Vec<bool>) -> u32 {
 
 fn encrypt(public_key: &Mat<f64>, bit: bool) -> String {
 
-    println!("=== Encrypting ===");
+    // println!("=== Encrypting ===");
     let mut rng = rand::rng();
 
     // Randomly choose subset of equations
     let num_equations = rng.random_range(2..=N);
-    println!("[encrypt] Using {:?} equations", num_equations);
+    // println!("[encrypt] Using {:?} equations", num_equations);
     let mut equations_used = Vec::<usize>::new();
     for _ in 0..num_equations {
         let chosen = rng.random_range(0..N);
         equations_used.push(chosen.try_into().unwrap());
     }
 
-    println!("[encrypt] Using equations {:?}", equations_used);
+    // println!("[encrypt] Using equations {:?}", equations_used);
 
     // Compute sum of chosen equations
     let mut final_vector = vec![0.0; N + 1];
@@ -116,16 +116,16 @@ fn encrypt(public_key: &Mat<f64>, bit: bool) -> String {
         final_vector[column] = (final_vector[column]).rem_euclid(Q);
     }
     
-    println!("[encrypt] Summed vector (before bit) = {:?}", final_vector);
+   // println!("[encrypt] Summed vector (before bit) = {:?}", final_vector);
 
     // Embed message bit
     if bit {
         final_vector[N] += (Q as i64 / 2) as f64;
-        println!("THe ciphertext before modding: {}", final_vector[N]);
+      // println!("THe ciphertext before modding: {}", final_vector[N]);
         final_vector[N] = final_vector[N].rem_euclid(Q);
-        println!("[encrypt] Added Q/2 ({}) for bit=1 → b' = {:.2}", (Q as i64 / 2) as f64, final_vector[N]);
+     // println!("[encrypt] Added Q/2 ({}) for bit=1 → b' = {:.2}", (Q as i64 / 2) as f64, final_vector[N]);
     } else {
-        println!("[encrypt] Bit = 0 (no offset added)");
+     // println!("[encrypt] Bit = 0 (no offset added)");
     }
 
     // Convert to ciphertext string
@@ -138,23 +138,23 @@ fn encrypt(public_key: &Mat<f64>, bit: bool) -> String {
         }
     }
     ciphertext.push(')');
-    println!("[encrypt] Ciphertext = {}", ciphertext);
-    println!("===================\n");
+    // println!("[encrypt] Ciphertext = {}", ciphertext);
+  // println!("===================\n");
 
     ciphertext
 }
 
 fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
-    println!("=== Decrypting ===");
-    println!("[decrypt] Ciphertext = {}", ciphertext);
+   // println!("=== Decrypting ===");
+   // println!("[decrypt] Ciphertext = {}", ciphertext);
 
     // Parse ciphertext "(x, y, z)"
     let middle: String = ciphertext.chars().skip(1).take(ciphertext.len() - 2).collect();
     let ciphertext_vectorized_string: Vec<&str> = middle.split(", ").collect();
-    println!(
-        "[decrypt] Parsed components (strings): {:?}",
-        ciphertext_vectorized_string
-    );
+   // println!(
+     //  "[decrypt] Parsed components (strings): {:?}",
+      // ciphertext_vectorized_string
+  // );
 
     // Convert to floats
     let mut ciphertext_vectorized: Vec<f64> = vec![];
@@ -164,7 +164,7 @@ fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
             Err(_) => panic!("[decrypt] Failed to parse ciphertext component."),
         }
     }
-    println!("[decrypt] Ciphertext vector = {:?}", ciphertext_vectorized);
+    // println!("[decrypt] Ciphertext vector = {:?}", ciphertext_vectorized);
 
     // Compute dot product a·s
     let mut cumulative_b: f64 = 0.0;
@@ -173,10 +173,10 @@ fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
         .enumerate()
     {
         cumulative_b += column * (*private_key)[(0, index)];
-        println!(
-            "    step {}: column={:.2}, s={:.2} → partial cumulative_b={:.2}",
-            index, column, private_key[(0, index)], cumulative_b
-        );
+       // println!(
+           // "    step {}: column={:.2}, s={:.2} → partial cumulative_b={:.2}",
+          //  index, column, private_key[(0, index)], cumulative_b
+     //  );
     }
     cumulative_b = cumulative_b.rem_euclid(Q);
 
@@ -191,7 +191,7 @@ fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
     // 1. Calculate the raw difference (noisy signal) in the range [0, Q).
     // This value, raw_diff, is what we compare against the boundaries.
     let raw_diff = (received_b - cumulative_b).rem_euclid(q_f64);
-    println!("The recieved-cumulative = {}-{}={}==={}", received_b, cumulative_b, received_b-cumulative_b, raw_diff);
+    //// println!("The recieved-cumulative = {}-{}={}==={}", received_b, cumulative_b, received_b-cumulative_b, raw_diff);
     
     // 2. Decide the bit:
     // Bit is 1 if raw_diff is in the Q/2 neighborhood [Q/4, 3Q/4].
@@ -201,7 +201,7 @@ fn decrypt(private_key: &Mat<f64>, ciphertext: String) -> bool {
     } else {
         false
     };
-    println!("[decrypt] Decrypted bit = {}\n", bit);
+ // println!("[decrypt] Decrypted bit = {}\n", bit);
     bit
 }
 
@@ -210,8 +210,8 @@ fn encrypt_text(text: String, public_key: &Mat<f64>) -> String {
     for character in text.chars() {
         let intvalue = character as u32;
         let bits = split_u32_to_bits(intvalue);
-        println!("Encrypt_text, encrypting {} bits in a single characte: ", bits.len());
-        println!("{:?}", bits);
+       // // println!("Encrypt_text, encrypting {} bits in a single characte: ", bits.len());
+       // println!("{:?}", bits);
         //panic!();
         for bit in bits {
             let encrypted = encrypt(public_key, bit);
@@ -223,18 +223,18 @@ fn encrypt_text(text: String, public_key: &Mat<f64>) -> String {
 }
 
 fn decrypt_text(text: String, private_key: &Mat<f64>) -> String {
-    println!("Derypting onecharacter");
+   // println!("Derypting onecharacter");
     let mut string_plaintext: String = Default::default();
     let mut split_ciphertext = text.split("+").collect::<Vec<_>>();
     split_ciphertext.pop();
     let mut current_character: Vec<bool> = Default::default();
     
     for character in split_ciphertext {
-        println!("Attempting to decrypt {}", character);
+     // println!("Attempting to decrypt {}", character);
 
         current_character.push(decrypt(&private_key, character.to_string()));
         if current_character.len() == 32 {
-            println!("bits: {:?}", current_character);
+            // println!("bits: {:?}", current_character);
             string_plaintext.push(
                 char::from_u32(bits_to_u32(current_character.clone()) as u32)
                     .expect("X")
@@ -276,7 +276,7 @@ fn encrypt_file(filename: String) -> usize {
     let mut pubkey = String::new();
     match file.read_to_string(&mut pubkey) {
         Err(why) => panic!("couldn't read pubkey: {}", why),
-        Ok(_) => print!("{} contains:\n{}\n", "Pubkey", pubkey),
+        Ok(_) => {},
     }
 
     let pubkey_vec: Vec<&str> = pubkey.split("\n")
@@ -319,7 +319,7 @@ fn decrypt_file(filename: String) -> usize {
     match file_data.read_to_string(&mut data) {
         Err(why) => panic!("couldn't read {}: {}", filename, why),
         Ok(bytes_) => {
-            print!("{} contains:\n{}\n", filename, data);
+        //print!("{} contains:\n{}\n", filename, data);
             bytes = bytes_;
         }
     };
@@ -335,7 +335,7 @@ fn decrypt_file(filename: String) -> usize {
     let mut privkey = String::new();
     match file.read_to_string(&mut privkey) {
         Err(why) => panic!("couldn't read privkey: {}", why),
-        Ok(_) => print!("{} contains:\n{}\n", "privkey", privkey),
+        Ok(_) => {},
     }
 
     let mut private_key: Mat<f64> = Mat::zeros(1, N);
@@ -347,7 +347,7 @@ fn decrypt_file(filename: String) -> usize {
     for (index, number) in privkeyvec.iter().enumerate() {
         private_key[(0, index)]  = (*number).parse::<f64>().unwrap();
     }
-    println!("Data to decrypt is:A\n{}\nA", data);
+ //   // println!("Data to decrypt is:A\n{}\nA", data);
 
     let plaintext = decrypt_text(data, &private_key);
     
@@ -357,14 +357,14 @@ fn decrypt_file(filename: String) -> usize {
         Ok(file) => file,
     };
     let _ = file.write_all(plaintext.as_bytes());
-    println!("wrote to file: {}", plaintext);
+  //  // println!("wrote to file: {}", plaintext);
     bytes
 }
 
 fn export_keys() {
     let (private_key, public_key) = gen_key();
     for i in 0..private_key.ncols() {
-        println!(", {}", private_key[(0, i)]);
+        // println!(", {}", private_key[(0, i)]);
     }
     //panic!();
     let path_pub = Path::new("public.key");
@@ -415,15 +415,15 @@ fn export_keys() {
 fn main1() {
     export_keys();
     let (private_key, public_key) = gen_key();
-    println!("{} rows in the public key", public_key.nrows());
+    // println!("{} rows in the public key", public_key.nrows());
     let ciphertext = encrypt_text("hello, world".to_string(), &public_key);
-    println!("A\n{}\nA", ciphertext);
+    // println!("A\n{}\nA", ciphertext);
     let plaintext = decrypt_text(ciphertext, &private_key);
-    println!("{}", plaintext);
-    println!("Welcome! Enter choice:");
+    // println!("{}", plaintext);
+    // println!("Welcome! Enter choice:");
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("input issue");
-    println!("{}", input);
+    // println!("{}", input);
     export_keys();
     encrypt_file("plaintext.txt".to_string());
     decrypt_file("plaintext.txt".to_string());
